@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử thi - PTIT Online Exam</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .history-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--ptit-red);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .history-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .h-info h3 {
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+        }
+
+        .h-meta {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 20px;
+        }
+
+        .h-meta div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .h-score {
+            text-align: right;
+        }
+
+        .h-score-val {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .h-score-val.excellent {
+            color: #2ECC71;
+        }
+
+        .h-score-val.good {
+            color: var(--ptit-gold);
+        }
+
+        .h-score-val.bad {
+            color: var(--ptit-red);
+        }
+
+        .h-score-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #E0E0E0;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.html" class="header-logo">
+                <i class="fas fa-graduation-cap"></i>
+                PTIT Exam
+            </a>
+            <div class="header-nav">
+                <a href="index.html">Kỳ thi</a>
+                <a href="history.html" class="active">Lịch sử</a>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar-initial">S</div>
+                    <span id="user-name-display" style="font-weight: 500; color: white;">Sinh viên</span>
+                    <a href="#" id="btn-logout" title="Đăng xuất"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 class="page-title" style="margin-bottom: 0;">Lịch sử làm bài</h1>
+            <button class="btn btn-outline" id="btn-clear-history" style="font-size: 0.9rem; padding: 8px 16px;">
+                <i class="fas fa-trash-alt"></i> Xóa lịch sử
+            </button>
+        </div>
+
+        <div id="history-container">
+            <!-- Rendered by JS -->
+        </div>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!Utils.checkAuth()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const container = document.getElementById('history-container');
+            const history = JSON.parse(localStorage.getItem('ptit_exam_history') || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history empty-icon"></i>
+                        <p class="empty-text">Bạn chưa thực hiện bài thi nào. Hãy tham gia một kỳ thi để xem kết quả tại đây.</p>
+                        <a href="index.html" class="btn btn-primary">Xem danh sách kỳ thi</a>
+                    </div>
+                `;
+            } else {
+                // Đảo ngược mảng để hiện bài thi mới nhất lên đầu
+                history.reverse().forEach((item, index) => {
+                    const score = parseFloat(item.score);
+                    let scoreClass = 'bad';
+                    if (score >= 8.0) scoreClass = 'excellent';
+                    else if (score >= 5.0) scoreClass = 'good';
+
+                    container.innerHTML += `
+                        <div class="history-card">
+                            <div class="h-info">
+                                <h3>${item.title}</h3>
+                                <div class="h-meta">
+                                    <div><i class="far fa-calendar-alt"></i> Nộp lúc: ${item.submittedAt}</div>
+                                    <div><i class="far fa-check-circle"></i> Đúng: ${item.correctAns}/${item.totalQ} câu</div>
+                                </div>
+                            </div>
+                            <div class="h-score">
+                                <div class="h-score-val ${scoreClass}">${item.score}</div>
+                                <div class="h-score-label">Điểm số</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('btn-clear-history').addEventListener('click', () => {
+                if (history.length === 0) return;
+                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử thi trên máy này không? Hành động này không thể hoàn tác.')) {
+                    localStorage.removeItem('ptit_exam_history');
+                    Utils.showToast('Đã xóa lịch sử thi', 'success');
+                    setTimeout(() => window.location.reload(), 800);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Area - PTIT Online Exam</title>
+    <link rel="icon"
+        href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png"
+        type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .auth-wrapper.admin-theme {
+            background: linear-gradient(135deg, #2C3E50 0%, #1a252f 100%);
+        }
+
+        .auth-wrapper.admin-theme::before {
+            background: radial-gradient(circle, rgba(211, 47, 47, 0.15) 0%, rgba(211, 47, 47, 0) 70%);
+        }
+
+        .admin-theme .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .admin-theme .auth-title {
+            color: var(--ptit-red-dark);
+        }
+
+        .admin-badge {
+            background: var(--ptit-red);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-wrapper admin-theme">
+        <div class="auth-card glass-panel">
+            <span class="admin-badge">ADMIN</span>
+            <div class="auth-header">
+                <div class="auth-logo" style="background: white; padding: 5px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png"
+                        alt="PTIT Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <h1 class="auth-title">Quản trị Hệ thống</h1>
+                <p class="auth-subtitle">Đăng nhập tài khoản Admin / Giảng viên</p>
+            </div>
+
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Mã Giảng viên / Tài khoản</label>
+                    <input type="text" id="username" class="form-control" placeholder="Mã CB/GV" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Mật khẩu</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" class="form-control" placeholder="Mật khẩu bảo mật"
+                            required style="padding-right: 40px;">
+                        <button type="button" id="toggle-password"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-light);">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thông báo lỗi đăng nhập -->
+                <div id="admin-login-error"
+                    style="display:none; background:#FFEBEE; color:#C62828; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:0.9rem; align-items:center; gap:8px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="admin-error-msg">Tài khoản hoặc mật khẩu không đúng.</span>
+                </div>
+
+                <button type="submit" id="admin-login-btn" class="btn btn-primary"
+                    style="width: 100%; background: #2C3E50; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);">
+                    <span id="admin-btn-text"><i class="fas fa-sign-in-alt"></i> Đăng nhập Quản trị</span>
+                    <span id="admin-btn-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Đang xử
+                        lý...</span>
+                </button>
+            </form>
+
+
+
+            <div style="text-align: center; margin-top: 20px; font-size: 0.85rem;">
+                <a href="login.html" style="color: var(--text-light); text-decoration: underline;">&larr; Quay lại trang
+                    sinh viên</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        // Nếu đã đăng nhập rồi, chuyển thẳng vào dashboard
+        (function () {
+            const user = Utils.checkAuth();
+            if (user && user.role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            }
+        })();
+
+        document.getElementById('admin-login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('admin-login-error');
+            const errorMsg = document.getElementById('admin-error-msg');
+            const btnText = document.getElementById('admin-btn-text');
+            const btnLoading = document.getElementById('admin-btn-loading');
+            const loginBtn = document.getElementById('admin-login-btn');
+
+            // Ẩn lỗi cũ
+            errorBox.style.display = 'none';
+
+            if (!username || !password) {
+                errorBox.style.display = 'flex';
+                errorMsg.textContent = 'Vui lòng nhập đầy đủ tài khoản và mật khẩu.';
+                return;
+            }
+
+            // Hiển thị loading
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            loginBtn.disabled = true;
+
+            try {
+                const user = await Auth.loginAdmin(username, password);
+
+                if (user) {
+                    Auth.saveSession(user);
+                    Utils.showToast('Đăng nhập thành công! Chào ' + user.name, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
+                } else {
+                    errorBox.style.display = 'flex';
+                    errorMsg.textContent = 'Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại.';
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    loginBtn.disabled = false;
+                }
+            } catch (err) {
+                errorBox.style.display = 'flex';
+                errorMsg.textContent = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Toggle Password visibility
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+
+</html>

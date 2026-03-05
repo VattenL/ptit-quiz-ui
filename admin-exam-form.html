@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo/Sửa Kỳ thi - PTIT Admin</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Reuse sidebar styles inline for simplicity as requested setup -->
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+            background: #F4F7F6;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2C3E50;
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #1a252f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .sidebar-header i {
+            color: var(--ptit-gold);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 0;
+            flex: 1;
+        }
+
+        .nav-links li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .nav-links li a:hover,
+        .nav-links li a.active {
+            background: var(--ptit-red);
+            color: white;
+            border-left: 4px solid var(--ptit-gold);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: 70px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .content-area {
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Form Specific Styles */
+        .panel {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .btn-import {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+
+        /* Dynamic Questions */
+        .q-builder-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #FAFAFA;
+            position: relative;
+        }
+
+        .btn-remove-q {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--ptit-red);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .opt-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .opt-row input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .opt-row input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2ECC71;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header"><i class="fas fa-shield-alt"></i> PTIT Admin</div>
+        <ul class="nav-links">
+            <li><a href="admin-dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
+            <li><a href="admin-exam-form.html" class="active"><i class="fas fa-edit"></i> Quản lý Kỳ thi</a></li>
+            <li><a href="admin-student-results.html"><i class="fas fa-users"></i> Kết quả Sinh viên</a></li>
+            <li><a href="admin-statistics.html"><i class="fas fa-chart-bar"></i> Thống kê</a></li>
+        </ul>
+    </aside>
+
+    <div class="main-content">
+        <div class="topbar">
+            <h2>Tạo / Sửa Kỳ Thi</h2>
+            <div class="user-profile"><span style="font-weight: 600;">Admin</span></div>
+        </div>
+
+        <div class="content-area">
+            <form id="exam-manage-form">
+                <div class="panel">
+                    <h3 class="panel-title">1. Thông tin chung</h3>
+                    <div class="form-group">
+                        <label class="form-label">Tên kỳ thi</label>
+                        <input type="text" class="form-control" placeholder="Ví dụ: Kiểm tra giữa kỳ môn CSDL" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label class="form-label">Loại kỳ thi</label>
+                                <select class="form-control">
+                                    <option>Luyện tập tự do</option>
+                                    <option>Bắt buộc (Theo khung giờ)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label class="form-label">Thời gian làm bài (Phút)</label>
+                                <input type="number" class="form-control" value="60" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mô tả / Ghi chú</label>
+                        <textarea class="form-control" rows="3" placeholder="Ghi chú dành cho sinh viên..."></textarea>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+                        <h3 class="panel-title" style="border: none; margin: 0; padding: 0;">2. Soạn thảo bộ câu hỏi
+                        </h3>
+                        <button type="button" class="btn btn-import"
+                            onclick="alert('Chức năng: Chọn file Excel (.xlsx) để nạp câu hỏi hàng loạt.')">
+                            <i class="fas fa-file-excel"></i> Import Excel
+                        </button>
+                    </div>
+
+                    <div id="q-container">
+                        <!-- Questions JS Render -->
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" class="btn btn-outline" id="btn-add-q">
+                            <i class="fas fa-plus-circle"></i> Thêm câu hỏi mới
+                        </button>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-bottom: 50px;">
+                    <button type="button" class="btn btn-outline" style="margin-right: 15px;"
+                        onclick="history.back()">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 30px;">Lưu Kỳ thi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Kiem tra quyen admin
+            const user = Utils.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            // Mock rendering 1 question first
+            let qCount = 0;
+            const qContainer = document.getElementById('q-container');
+
+            function addQuestion() {
+                qCount++;
+                const div = document.createElement('div');
+                div.className = 'q-builder-card';
+                div.innerHTML = `
+                    <button type="button" class="btn-remove-q" title="Xóa câu hỏi" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+                    <div class="form-group">
+                        <label class="form-label">Nội dung Câu ${qCount}</label>
+                        <textarea class="form-control" rows="2" placeholder="Nhập câu hỏi..."></textarea>
+                    </div>
+                    <label class="form-label">Các Đáp án (Chọn đáp án đúng bằng Radio Button)</label>
+                    <div class="options-group">
+                        <div class="opt-row"><input type="radio" name="correct_${qCount}" checked> <input type="text" placeholder="Đáp án A"></div>
+                        <div class="opt-row"><input type="radio" name="correct_${qCount}"> <input type="text" placeholder="Đáp án B"></div>
+                        <div class="opt-row"><input type="radio" name="correct_${qCount}"> <input type="text" placeholder="Đáp án C"></div>
+                        <div class="opt-row"><input type="radio" name="correct_${qCount}"> <input type="text" placeholder="Đáp án D"></div>
+                    </div>
+                 `;
+                qContainer.appendChild(div);
+            }
+
+            document.getElementById('btn-add-q').addEventListener('click', addQuestion);
+
+            // Start with 1 empty question
+            addQuestion();
+
+            document.getElementById('exam-manage-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                Utils.showToast('Lưu thông tin kỳ thi thành công!', 'success');
+                setTimeout(() => window.location.href = 'admin-dashboard.html', 1500);
+            });
+        });
+    </script>
+</body>
+
+</html>
