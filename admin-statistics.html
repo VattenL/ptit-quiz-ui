@@ -26,6 +26,7 @@
             min-height: 100vh;
             position: fixed;
             left: 0;
+            top: 0;
             display: flex;
             flex-direction: column;
             z-index: 100;
@@ -34,8 +35,15 @@
         .sidebar-header {
             padding: 20px;
             background: #1a252f;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 1.2rem;
             font-weight: bold;
+        }
+
+        .sidebar-header i {
+            color: var(--ptit-gold);
         }
 
         .nav-links {
@@ -51,6 +59,7 @@
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             gap: 15px;
+            transition: all 0.3s;
         }
 
         .nav-links li a:hover,
@@ -123,8 +132,7 @@
 
 <body>
     <aside class="sidebar">
-        <div class="sidebar-header"><i class="fas fa-shield-alt" style="color:var(--ptit-gold);margin-right:10px;"></i>
-            PTIT Admin</div>
+        <div class="sidebar-header"><i class="fas fa-shield-alt"></i> PTIT Admin</div>
         <ul class="nav-links">
             <li><a href="admin-dashboard.html"><i class="fas fa-home"></i> Tổng quan</a></li>
             <li><a href="admin-exam-form.html"><i class="fas fa-edit"></i> Quản lý Kỳ thi</a></li>
