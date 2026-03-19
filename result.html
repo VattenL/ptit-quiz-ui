@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả thi - PTIT Online Exam</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .result-container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .score-card {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 15px solid var(--border-color);
+            margin-bottom: 25px;
+            position: relative;
+            background: var(--bg-light);
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .score-circle.excellent {
+            border-color: #2ECC71;
+            color: #2ECC71;
+        }
+
+        .score-circle.good {
+            border-color: var(--ptit-gold);
+            color: #F39C12;
+        }
+
+        .score-circle.bad {
+            border-color: var(--ptit-red);
+            color: var(--ptit-red);
+        }
+
+        .score-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 5px;
+            color: var(--text-light);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .review-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .review-header {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .review-q-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #FAFAFA;
+            border-left: 5px solid var(--border-color);
+        }
+
+        .review-q-card.correct {
+            border-left-color: #2ECC71;
+            background: rgba(46, 204, 113, 0.05);
+        }
+
+        .review-q-card.incorrect {
+            border-left-color: var(--ptit-red);
+            background: rgba(211, 47, 47, 0.05);
+        }
+
+        .r-q-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .r-option {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .r-option.is-correct {
+            background: #E8F5E9;
+            border-color: #A5D6A7;
+            color: #2E7D32;
+            font-weight: 500;
+        }
+
+        .r-option.is-wrong {
+            background: #FFEBEE;
+            border-color: #EF9A9A;
+            color: #C62828;
+        }
+
+        .r-icon {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.html" class="header-logo">
+                <i class="fas fa-graduation-cap"></i>
+                PTIT Exam
+            </a>
+            <div class="header-nav">
+                <a href="index.html">Trang chủ</a>
+                <a href="history.html" class="active">Kết quả thi</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="result-container">
+        <div class="score-card glass-panel">
+            <h2 style="margin-bottom: 10px; color: var(--text-dark);" id="exam-title">Đang tính điểm...</h2>
+            <p style="color: var(--text-light); margin-bottom: 30px;">Họ tên: <span id="student-name"></span></p>
+
+            <div class="score-circle" id="score-circle">
+                <div class="score-number" id="score-text">0</div>
+                <div class="score-label">Điểm số</div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #2ECC71;" id="correct-count">0</div>
+                    <div class="stat-label">Câu đúng</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: var(--ptit-red);" id="wrong-count">0</div>
+                    <div class="stat-label">Câu sai / Bỏ qua</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-count">0</div>
+                    <div class="stat-label">Tổng câu hỏi</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                <a href="index.html" class="btn btn-primary">Khám phá các kỳ thi khác</a>
+                <a href="history.html" class="btn btn-outline">Xem lịch sử của bạn</a>
+            </div>
+        </div>
+
+        <div class="review-section">
+            <h3 class="review-header"><i class="fas fa-clipboard-check"></i> Chi tiết bài làm</h3>
+            <div id="review-container">
+                <!-- JS Rendered -->
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = Utils.checkAuth();
+            document.getElementById('student-name').textContent = user.name;
+
+            // Load results
+            const resultData = JSON.parse(localStorage.getItem('temp_exam_result'));
+            if (!resultData) {
+                alert('Không tìm thấy dữ liệu bài thi!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const exam = MockData.exams.find(e => e.id === resultData.examId);
+            const questions = MockData.getQuestions(exam.id);
+
+            document.getElementById('exam-title').textContent = `Kết quả thi: ${exam.title}`;
+
+            let correctAns = 0;
+            const reviewHtml = [];
+
+            questions.forEach((q, index) => {
+                const userAns = resultData.answers[q.id];
+                const isCorrect = userAns === q.correct;
+
+                if (isCorrect) correctAns++;
+
+                const cardClass = isCorrect ? 'correct' : 'incorrect';
+                const statusIcon = isCorrect ? '<i class="fas fa-check-circle" style="color: #2ECC71;"></i>' : '<i class="fas fa-times-circle" style="color: var(--ptit-red);"></i>';
+
+                let optionsListHtml = '';
+                q.options.forEach((opt, oIdx) => {
+                    let optClass = '';
+                    let iconHtml = '<i class="far fa-circle r-icon"></i>';
+
+                    if (oIdx === q.correct) {
+                        optClass = 'is-correct';
+                        iconHtml = '<i class="fas fa-check-circle r-icon"></i>';
+                    } else if (oIdx === userAns) {
+                        optClass = 'is-wrong';
+                        iconHtml = '<i class="fas fa-times-circle r-icon"></i>';
+                    } else if (userAns === oIdx) { // Selected but not correct and not wrong? Imposible but good for logic fallback
+                        iconHtml = '<i class="fas fa-dot-circle r-icon"></i>';
+                    }
+
+                    optionsListHtml += `
+                        <div class="r-option ${optClass}">
+                            ${iconHtml}
+                            <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+                            ${oIdx === userAns ? '<span style="margin-left:auto; font-size: 0.8rem; font-style: italic;">Bạn chọn</span>' : ''}
+                        </div>
+                    `;
+                });
+
+                reviewHtml.push(`
+                    <div class="review-q-card ${cardClass}">
+                        <div class="r-q-text">
+                            ${statusIcon} Câu ${index + 1}: ${q.text}
+                        </div>
+                        <div class="r-options-list">
+                            ${optionsListHtml}
+                        </div>
+                    </div>
+                `);
+            });
+
+            // Calculate Score
+            const totalQ = questions.length;
+            const score10Scale = ((correctAns / totalQ) * exam.totalScore).toFixed(1);
+
+            document.getElementById('correct-count').textContent = correctAns;
+            document.getElementById('wrong-count').textContent = totalQ - correctAns;
+            document.getElementById('total-count').textContent = totalQ;
+            document.getElementById('score-text').textContent = score10Scale;
+            document.getElementById('review-container').innerHTML = reviewHtml.join('');
+
+            // Score styling
+            const circle = document.getElementById('score-circle');
+            if (score10Scale >= 8.0) {
+                circle.classList.add('excellent');
+            } else if (score10Scale >= 5.0) {
+                circle.classList.add('good');
+            } else {
+                circle.classList.add('bad');
+            }
+        });
+    </script>
+</body>
+
+</html>

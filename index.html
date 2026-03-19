@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - PTIT Online Exam</title>
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            border-color: var(--ptit-red);
+        }
+
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 15px;
+        }
+
+        .exam-card {
+            padding: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border-top: 4px solid var(--ptit-red);
+        }
+
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .exam-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+
+        .status-open {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-upcoming {
+            background-color: #FFF3E0;
+            color: #EF6C00;
+        }
+
+        .exam-title {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .exam-meta {
+            margin-bottom: 25px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .exam-meta div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exam-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .exam-actions .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.html" class="header-logo">
+                PTIT Quiz
+            </a>
+            <div class="header-nav">
+                <a href="index.html" class="active">Kỳ thi</a>
+                <a href="history.html">Lịch sử</a>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar-initial">S</div>
+                    <span id="user-name-display" style="font-weight: 500; color: white;">Sinh viên</span>
+                    <a href="#" id="btn-logout" title="Đăng xuất"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <h1 class="page-title">Danh sách bài thi</h1>
+
+        <div class="filter-bar">
+            <input type="text" id="search-input" placeholder="Tìm kiếm tên kỳ thi...">
+            <select id="type-filter">
+                <option value="all">Tất cả bài thi</option>
+                <option value="practice">Luyện tập</option>
+                <option value="midterm">Giữa kỳ</option>
+                <option value="final">Cuối kỳ</option>
+            </select>
+            <select id="status-filter">
+                <option value="all">Mọi trạng thái</option>
+                <option value="open">Đang mở</option>
+                <option value="upcoming">Sắp diễn ra</option>
+            </select>
+        </div>
+
+        <div class="exam-grid" id="exam-container">
+            <!-- Rendered by JS -->
+        </div>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const renderExams = (exams) => {
+                const container = document.getElementById('exam-container');
+                container.innerHTML = '';
+
+                if (exams.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-light);">Không tìm thấy bài thi nào phù hợp.</div>';
+                    return;
+                }
+
+                exams.forEach(exam => {
+                    const statusClass = exam.status === 'open' ? 'status-open' : 'status-upcoming';
+                    const statusText = exam.status === 'open' ? 'Sẵn sàng thi' : 'Sắp diễn ra';
+                    const actBtn = exam.status === 'open'
+                        ? `<a href="exam.html?id=${exam.id}" class="btn btn-primary">Vào thi ngay <i class="fas fa-arrow-right" style="margin-left: 5px;"></i></a>`
+                        : `<button class="btn btn-outline" disabled>Chưa mở</button>`;
+
+                    container.innerHTML += `
+                        <div class="exam-card glass-panel">
+                            <span class="exam-status ${statusClass}">${statusText}</span>
+                            <h3 class="exam-title">${exam.title}</h3>
+                            <div class="exam-meta">
+                                <div><i class="far fa-clock"></i> Thời gian: ${exam.duration} phút</div>
+                                <div><i class="far fa-question-circle"></i> Số câu hỏi: ${exam.questions} câu</div>
+                                ${exam.date ? `<div><i class="far fa-calendar-alt"></i> Mở lúc: ${exam.date}</div>` : ''}
+                            </div>
+                            <div class="exam-actions">
+                                ${actBtn}
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+
+            renderExams(MockData.exams);
+
+            // Simple Filter logic
+            const filterExams = () => {
+                const term = document.getElementById('search-input').value.toLowerCase();
+                const type = document.getElementById('type-filter').value;
+                const status = document.getElementById('status-filter').value;
+
+                const filtered = MockData.exams.filter(e => {
+                    const matchTerm = e.title.toLowerCase().includes(term);
+                    const matchType = type === 'all' || e.type === type;
+                    const matchStatus = status === 'all' || e.status === status;
+                    return matchTerm && matchType && matchStatus;
+                });
+
+                renderExams(filtered);
+            };
+
+            document.getElementById('search-input').addEventListener('input', filterExams);
+            document.getElementById('type-filter').addEventListener('change', filterExams);
+            document.getElementById('status-filter').addEventListener('change', filterExams);
+        });
+    </script>
+</body>
+
+</html>

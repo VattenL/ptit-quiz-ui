@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - PTIT Online Exam</title>
+    <link rel="icon"
+        href="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png"
+        type="image/png">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card glass-panel">
+            <div class="auth-header">
+                <div class="auth-logo" style="background: white; padding: 5px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Logo_PTIT_University.png/1280px-Logo_PTIT_University.png"
+                        alt="PTIT Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <h1 class="auth-title">PTIT Exam System</h1>
+                <p class="auth-subtitle">Đăng nhập hệ thống thi trắc nghiệm trực tuyến</p>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Tên đăng nhập / Mã SV</label>
+                    <input type="text" id="username" class="form-control" placeholder="Nhập tên đăng nhập hoặc mã SV"
+                        required>
+                    <div class="error-message" id="username-error">Vui lòng nhập tên đăng nhập</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Mật khẩu</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" class="form-control" placeholder="Nhập mật khẩu" required
+                            style="padding-right: 40px;">
+                        <button type="button" id="toggle-password"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-light);">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="password-error">Vui lòng nhập mật khẩu</div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.9rem;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="remember"> Ghi nhớ
+                    </label>
+                    <a href="#">Quên mật khẩu?</a>
+                </div>
+
+                <!-- Thông báo lỗi đăng nhập -->
+                <div id="login-error"
+                    style="display:none; background:#FFEBEE; color:#C62828; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:0.9rem; align-items:center; gap:8px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="login-error-msg">Tên đăng nhập hoặc mật khẩu không đúng.</span>
+                </div>
+
+                <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%;">
+                    <span id="login-btn-text"><i class="fas fa-sign-in-alt"></i> Đăng nhập</span>
+                    <span id="login-btn-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Đang xử
+                        lý...</span>
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 25px; font-size: 0.9rem;">
+                Chưa có tài khoản? <a href="register.html" style="font-weight: 600;">Đăng ký ngay</a>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: var(--text-light);">
+                <a href="admin.html" style="color: var(--text-light); text-decoration: underline;">Đăng nhập quyền Quản
+                    trị viên</a>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('login-error');
+            const errorMsg = document.getElementById('login-error-msg');
+
+            // Ẩn lỗi cũ
+            errorBox.style.display = 'none';
+
+            if (!username || !password) {
+                errorBox.style.display = 'flex';
+                errorMsg.textContent = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.';
+                return;
+            }
+
+            Utils.showToast('Đăng nhập phía client đã được gỡ. Vui lòng tích hợp FastAPI backend.', 'info');
+        });
+
+        // Toggle Password visibility
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+
+</html>
