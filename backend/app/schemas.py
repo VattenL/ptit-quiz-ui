@@ -42,3 +42,8 @@ class AuthResponse(SQLModel):
 
 class MessageResponse(SQLModel):
     detail: str
+
+class UserUpdateRequest(SQLModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    class_name: Optional[str] = None

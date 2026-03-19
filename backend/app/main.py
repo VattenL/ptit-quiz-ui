@@ -7,12 +7,12 @@ from sqlmodel import Session, select
 try:
     from .database import create_db_and_tables, get_session
     from .models import User, RevokedToken
-    from .schemas import AuthResponse, LoginRequest, RegisterRequest, UserPublic, MessageResponse, LogoutRequest
+    from .schemas import AuthResponse, LoginRequest, RegisterRequest, UserPublic, MessageResponse, LogoutRequest, UserUpdateRequest
     from .security import create_access_token, hash_password, verify_password, extract_jti, decode_access_token
 except ImportError:
     from database import create_db_and_tables, get_session
     from models import User, RevokedToken
-    from schemas import AuthResponse, LoginRequest, RegisterRequest, UserPublic, MessageResponse, LogoutRequest
+    from schemas import AuthResponse, LoginRequest, RegisterRequest, UserPublic, MessageResponse, LogoutRequest, UserUpdateRequest
     from security import create_access_token, hash_password, verify_password, extract_jti, decode_access_token
 
 app = FastAPI(title="PTIT Exam Backend", version="0.1.0")
@@ -140,6 +140,11 @@ def get_current_user(authorization: str | None = Header(default=None), db: Sessi
     
     return user
 
+def get_current_admin(user: User = Depends(get_current_user)):
+    if user.role.lower().strip() != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed")
+    return user
+
 @app.post("/api/auth/logout", response_model=MessageResponse)
 def logout(authorization: str = Header(default=None), db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
     token = authorization.split(" ")[1]
@@ -155,10 +160,43 @@ def logout(authorization: str = Header(default=None), db: Session = Depends(get_
 def get_me(current_user: User = Depends(get_current_user)):
     return to_user_public(current_user)
 
-@app.put("/api/user/update-info")
-def get_all_user():
-    pass
+@app.post("/api/admin/login", response_model=AuthResponse)
+def admin_login(payload: LoginRequest, db: Session = Depends(get_session)):
+    user = db.exec(select(User).where(User.username == payload.username)).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is inactive")
+    
+    if user.role.lower().strip() != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not an admin")
+    
+    access_token = create_access_token(user.username)
+    return AuthResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=to_user_public(user),
+    )
+    
+@app.get("/api/get/students", response_model=list[UserPublic])
+def get_all_students(admin: User = Depends(get_current_admin), db: Session = Depends(get_session)):
+    users = db.exec(select(User).where(User.role.lower().strip() == "student")).all()
+    if not users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
+    return [to_user_public(user) for user in users]
+
+@app.put("/api/update/user", response_model=UserPublic)
+def update_user(payload: UserUpdateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_session)):
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+    
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    
+    return to_user_public(current_user)
