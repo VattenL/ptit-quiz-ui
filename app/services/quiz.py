@@ -7,7 +7,7 @@ from app.models.quiz import Quiz
 
 
 def get_quizzes(db: Session, course_id=None, status=None, page=1, limit=10):
-    query = db.query(Quiz)
+    query = db.query(Quiz).order_by(Quiz.order)
     if course_id: 
         query = query.filter(Quiz.course_id == course_id)
     if status:    
@@ -48,9 +48,9 @@ def delete_quiz(db: Session, quiz_id: str):
     return {"success": True}
 
 def sort_quizzes(db: Session, quiz_ids: list):
-    quizzes = []
-    for quiz_id in quiz_ids:
+    for index, quiz_id in enumerate(quiz_ids):
         quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
         if quiz:
-            quizzes.append(quiz)
+            quiz.order = index
+    db.commit()
     return {"success": True}

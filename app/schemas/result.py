@@ -11,7 +11,7 @@ class AttemptOut(BaseModel):
     total_marks  : Optional[float] = None
     percentage   : Optional[float] = None
     passed       : Optional[bool] = None
-    attempted_at : Optional[datetime] = None
+    created_at   : Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -27,7 +27,7 @@ class StudentResultItem(BaseModel):
     title        : str
     score        : Optional[float] = None
     passed       : Optional[bool] = None
-    attempted_at : Optional[datetime] = None
+    created_at   : Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
