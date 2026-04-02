@@ -8,7 +8,7 @@ from models.quiz import Quiz
 
 
 def get_quizzes(db: Session, course_id=None, status=None, page=1, limit=10):
-    query = db.query(Quiz)
+    query = db.query(Quiz).order_by(Quiz.order)
     if course_id: 
         query = query.filter(Quiz.course_id == course_id)
     if status:    

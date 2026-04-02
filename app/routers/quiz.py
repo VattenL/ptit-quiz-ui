@@ -25,7 +25,7 @@ def get_quizzes(
 
 @router.post("", response_model=QuizCreateResponse, status_code=201)
 def create_quiz(body: QuizCreateInput, db: Session = Depends(get_db)):
-    return quiz_service.create_quiz(db, data=body.dict())
+    return quiz_service.create_quiz(db, data=body.model_dump())
 
 
 @router.get("/search")
@@ -40,7 +40,7 @@ def get_quiz(quiz_id: str, db: Session = Depends(get_db)):
 
 @router.put("/{quiz_id}", response_model=SuccessResponse)
 def update_quiz(quiz_id: str, body: QuizUpdateInput, db: Session = Depends(get_db)):
-    return quiz_service.update_quiz(db, quiz_id=quiz_id, data=body.dict())
+    return quiz_service.update_quiz(db, quiz_id=quiz_id, data=body.model_dump())
 
 
 @router.delete("/{quiz_id}", response_model=SuccessResponse)

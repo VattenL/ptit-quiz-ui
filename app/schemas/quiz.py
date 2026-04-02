@@ -11,6 +11,7 @@ class QuizListItem(BaseModel):
     status          : Optional[str] = None
     time_limit_mins : Optional[int] = None
     total_marks     : Optional[float] = None
+    order           : Optional[int] = None
     created_at      : Optional[datetime] = None
 
     model_config = {"from_attributes": True}

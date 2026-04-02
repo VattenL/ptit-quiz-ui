@@ -80,6 +80,7 @@ class Quiz(Base):
     available_from    = Column(DateTime)
     available_until   = Column(DateTime)
     total_marks       = Column(Float)
+    order             = Column(Integer, default=0)
     created_at        = Column(DateTime)
     updated_at        = Column(DateTime)
 
