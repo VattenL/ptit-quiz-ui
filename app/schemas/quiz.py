@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-
+from sqlalchemy import Enum
 
 class QuizListItem(BaseModel):
     id              : str

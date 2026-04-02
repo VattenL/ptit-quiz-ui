@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text, Integer, Float, Boolean, DateTime, JSON, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from core.database import Base
 
 
 class Faculty(Base):

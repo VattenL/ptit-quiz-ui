@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.quiz import QuizAttempt, Quiz
+from models.quiz import QuizAttempt, Quiz
 
 
 def get_results(db: Session, course_id=None, student_id=None):
@@ -15,7 +15,20 @@ def get_results(db: Session, course_id=None, student_id=None):
         return {"average_score": 0, "pass_rate": 0, "attempts": []}
     average_score = sum(a.score or 0 for a in attempts) / len(attempts)
     pass_rate     = sum(1 for a in attempts if a.passed) / len(attempts)
-    return {"average_score": average_score, "pass_rate": pass_rate, "attempts": attempts}
+    mapped_attempts = [
+        {
+            "id": str(a.id),
+            "quiz_id": str(a.quiz_id),
+            "student_id": str(a.student_id),
+            "score": a.score,
+            "total_marks": a.total_marks,
+            "percentage": a.percentage,
+            "passed": a.passed,
+            "attempted_at": a.created_at
+        }
+        for a in attempts
+    ]
+    return {"average_score": average_score, "pass_rate": pass_rate, "attempts": mapped_attempts}
 
 
 

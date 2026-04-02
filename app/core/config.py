@@ -2,15 +2,11 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_HOST: str = "localhost"
-    DB_PORT: int = 3306
-    DB_NAME: str = "quiz_platform"
-    DB_USER: str = "root"
-    DB_PASSWORD: str = ""
+    DB_NAME: str = "quiz_platform.db"
 
     @property
     def DATABASE_URL(self) -> str:
-        return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"sqlite:///./{self.DB_NAME}"
 
     model_config = {"env_file": ".env"}
 

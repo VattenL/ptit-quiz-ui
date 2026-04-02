@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from app.core.database import get_db
-from app.schemas.quiz import (
+from core.database import get_db
+from schemas.quiz import (
     QuizListResponse, QuizCreateInput, QuizCreateResponse,
     QuizUpdateInput, QuizDetailResponse, SortInput, SuccessResponse
 )
-import app.services.quiz as quiz_service
+import services.quiz as quiz_service
 
 router = APIRouter(prefix="/api/quizzes", tags=["Quizzes"])
 
@@ -28,12 +28,12 @@ def create_quiz(body: QuizCreateInput, db: Session = Depends(get_db)):
     return quiz_service.create_quiz(db, data=body.dict())
 
 
-@router.post("/sort", response_model=SuccessResponse)
-def sort_quizzes(body: SortInput, db: Session = Depends(get_db)):
-    return quiz_service.sort_quizzes(db, quiz_ids=body.quiz_ids)
+@router.get("/search")
+def search_quizzes(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    return quiz_service.search_quizzes(db, search_term=q)
 
 
-@router.get("/{quiz_id}", response_model=QuizDetailResponse)
+@router.get("/search_id/{quiz_id}", response_model=QuizDetailResponse)
 def get_quiz(quiz_id: str, db: Session = Depends(get_db)):
     return quiz_service.get_quiz_by_id(db, quiz_id=quiz_id)
 

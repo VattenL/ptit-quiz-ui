@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from app.core.database import get_db
-from app.schemas.result import ResultsResponse, StudentResultsResponse
-import app.services.result as result_service
+from core.database import get_db
+from schemas.result import ResultsResponse, StudentResultsResponse
+import services.result as result_service
 
 router = APIRouter(prefix="/api/results", tags=["Results"])
 

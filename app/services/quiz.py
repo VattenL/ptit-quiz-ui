@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import select, func
 from fastapi import HTTPException
 from datetime import datetime
 import uuid
 
-from app.models.quiz import Quiz
+from models.quiz import Quiz
 
 
 def get_quizzes(db: Session, course_id=None, status=None, page=1, limit=10):
@@ -18,7 +19,8 @@ def get_quizzes(db: Session, course_id=None, status=None, page=1, limit=10):
     return {"quizzes": quizzes, "total": total, "page": page}
 
 def create_quiz(db: Session, data: dict):
-    quiz = Quiz(id=str(uuid.uuid4()), created_at=datetime.utcnow(), **data)
+    cnt = db.execute(select(func.count(Quiz.id))).scalar()
+    quiz = Quiz(id=str(cnt + 1), created_at=datetime.utcnow(), **data)
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
@@ -28,29 +30,37 @@ def get_quiz_by_id(db: Session, quiz_id: str):
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz: 
         raise HTTPException(status_code=404, detail="Quiz not found")
-    return quiz
+    
+    # Map the ORM 'id' to 'quiz_id' to satisfy the Pydantic schema validation
+    return {
+        "quiz_id": quiz.id,
+        "title": quiz.title,
+        "time_limit_mins": quiz.time_limit_mins,
+        "total_marks": quiz.total_marks,
+        "questions": quiz.questions
+    }
 
 def update_quiz(db: Session, quiz_id: str, data: dict):
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
-    if not quiz: raise HTTPException(404)
+    if not quiz: 
+        raise HTTPException(status_code=404, detail="Quiz not found")
     for key, value in data.items():
            if value is not None: setattr(quiz, key, value)
     quiz.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(quiz)
-    return {"success": True}
+    return quiz
 
 def delete_quiz(db: Session, quiz_id: str):
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
-    if not quiz: raise HTTPException(404)
+    if not quiz: 
+        raise HTTPException(status_code=404, detail="Quiz not found")
     db.delete(quiz)
     db.commit()
     return {"success": True}
 
-def sort_quizzes(db: Session, quiz_ids: list):
-    quizzes = []
-    for quiz_id in quiz_ids:
-        quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
-        if quiz:
-            quizzes.append(quiz)
-    return {"success": True}
+def search_quizzes(db: Session, search_term: str):
+    quizzes = db.query(Quiz).filter(Quiz.title.ilike(f"%{search_term.strip()}%")).all()
+    if not quizzes: 
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return {"success": True, "quizzes": quizzes}
